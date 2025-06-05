@@ -3,9 +3,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export const envs = {
-  SUPABASE_PASSWORD: process.env.SUPABASE_PASSWORD,
-  SUPABASE_URI: process.env.SUPABASE_URI,
-  SUPABASE_API: process.env.SUPABASE_API,
+  DATABASE_URL: process.env.DATABASE_URL,
   JWT_SECRET: process.env.JWT_SECRET,
   SMTP_MAIL: process.env.SMTP_MAIL,
   SMTP_PASSWORD: process.env.SMTP_PASSWORD,
