@@ -1,6 +1,21 @@
 {
   "name": "template",
-  "version": "0.0.1",
+  "version": "0.1.4",
+  "description": "Template for Next.js projects",
+  "author": "Diego Herrera Gré",
+  "license": "MIT",
+  "keywords": [
+    "nextjs",
+    "template",
+    "shadcn"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DiegoHerreraG/template-next-js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/DiegoHerreraG/template-next-js/issues"
+  },
   "private": true,
   "scripts": {
     "dev": "next dev -p PORT",
@@ -16,7 +31,8 @@
     "pm2:logs": "pm2 logs ecosystem.config.js",
     "pm2:list": "pm2 list",
     "pm2:status": "pm2 status ecosystem.config.js",
-    "add:component": "COMPONENT=$(node -p \"process.argv[1] || ''\" \"$component\") && if [ -z \"$COMPONENT\" ]; then read -p 'Nombre del componente: ' COMPONENT; fi && npx shadcn@latest add $COMPONENT",
+    "add:shadcn": "COMPONENT=$(node -p \"process.argv[1] || ''\" \"$component\") && if [ -z \"$COMPONENT\" ]; then read -p 'Nombre del componente: ' COMPONENT; fi && npx shadcn@latest add $COMPONENT",
+    "add:acerternity": "COMPONENT=$(node -p \"process.argv[1] || ''\" \"$component\") && if [ -z \"$COMPONENT\" ]; then read -p 'Nombre del componente: ' COMPONENT; fi && npx shadcn@latest add https://ui.aceternity.com/registry/$COMPONENT.json",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
@@ -28,7 +44,7 @@
   "dependencies": {
     "@headlessui/react": "^2.2.4",
     "@heroicons/react": "^2.2.0",
-    "@hookform/resolvers": "^5.0.1",
+    "@hookform/resolvers": "^5.1.0",
     "@prisma/client": "^6.9.0",
     "@radix-ui/react-dialog": "^1.1.14",
     "@radix-ui/react-label": "^2.1.7",

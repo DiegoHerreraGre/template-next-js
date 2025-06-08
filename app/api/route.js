@@ -1,4 +1,4 @@
-import { PermisionMiddleware } from "@/middleware";
+import PermisionMiddleware from "@/middleware/permisions.middleware";
 
 export async function GET(request) {
   return PermisionMiddleware(request);

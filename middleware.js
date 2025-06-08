@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { envs } from "@/config/envs.config";
 
 export function middleware(request) {
   const url = new URL(request.url);
@@ -82,17 +83,84 @@ export function middleware(request) {
     const response = NextResponse.redirect(
       new URL("/error?code=403&reason=security", request.url)
     );
+
+    // Headers de seguridad para respuestas bloqueadas
+    setSecurityHeaders(response, url, request, true);
     response.headers.set("X-Security-Block", "path-traversal-protection");
-    response.headers.set("X-Content-Type-Options", "nosniff");
-    response.headers.set("X-Frame-Options", "DENY");
+
     return response;
   }
 
   const response = NextResponse.next();
-  response.headers.set("X-Content-Type-Options", "nosniff");
-  response.headers.set("X-Frame-Options", "SAMEORIGIN");
-  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  setSecurityHeaders(response, url, request, false);
   return response;
+}
+
+/**
+ * Configura todos los headers de seguridad incluyendo HSTS
+ * @param {NextResponse} response - Respuesta de Next.js
+ * @param {URL} url - URL de la request
+ * @param {Request} request - Request original
+ * @param {boolean} isBlocked - Si la request fue bloqueada
+ */
+function setSecurityHeaders(response, url, request, isBlocked = false) {
+  // Headers base de seguridad
+  const baseHeaders = {
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": isBlocked ? "DENY" : "SAMEORIGIN",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "X-XSS-Protection": "1; mode=block",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+  };
+
+  // Aplicar headers base
+  Object.entries(baseHeaders).forEach(([key, value]) => {
+    response.headers.set(key, value);
+  });
+
+  // 🔒 HSTS - Solo en conexiones HTTPS
+  const isHTTPS =
+    url.protocol === "https:" ||
+    request.headers.get("x-forwarded-proto") === "https" ||
+    request.headers.get("x-forwarded-ssl") === "on";
+
+  if (isHTTPS) {
+    const hstsValue = getHSTSConfig();
+    response.headers.set("Strict-Transport-Security", hstsValue);
+  }
+}
+
+/**
+ * Genera la configuración HSTS basada en el entorno
+ * @returns {string} Valor del header HSTS
+ */
+function getHSTSConfig() {
+  const isDevelopment = process.env.NODE_ENV === "development";
+  const isProduction = process.env.NODE_ENV === "production";
+
+  if (isDevelopment) {
+    return "max-age=86400"; // 1 día en desarrollo
+  }
+
+  if (isProduction) {
+    const maxAge = envs.HSTS_MAX_AGE || "31536000";
+    const includeSubdomains = envs.HSTS_INCLUDE_SUBDOMAINS !== "false";
+    const preload = envs.HSTS_PRELOAD === "true";
+
+    let hstsValue = `max-age=${maxAge}`;
+
+    if (includeSubdomains) {
+      hstsValue += "; includeSubDomains";
+    }
+
+    if (preload) {
+      hstsValue += "; preload";
+    }
+
+    return hstsValue;
+  }
+
+  return "max-age=300"; // 5 minutos como fallback
 }
 
 export const config = {
